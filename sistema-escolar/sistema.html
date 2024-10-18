@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gerenciamento de Turmas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-image: url('professor.jpeg'); /* Substitua pelo caminho correto da imagem */
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+            overflow: hidden;
+        }
+
+        .container {
+            display: none; /* Esconde as seções inicialmente */
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .container.show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h2 {
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"] {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #3498db;
+            border-radius: 25px;
+            background-color: #f0f8ff;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        input[type="date"]:focus {
+            border-color: #2980b9;
+            box-shadow: 0 0 5px rgba(41, 128, 185, 0.5);
+        }
+
+        .button {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 25px;
+            background-color: #3498db;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 0;
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+
+        .button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        .footer a {
+            text-decoration: none;
+            color: #3498db;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: #2980b9;
+        }
+
+        /* Estilo para a listagem de turmas */
+        ul.turma-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        ul.turma-list li {
+            background: #f9f9f9;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+
+        ul.turma-list li:hover {
+            background-color: #ecf0f1;
+        }
+
+        /* Estilo para o botão de excluir */
+        .button-danger {
+            background-color: #e74c3c;
+        }
+
+        .button-danger:hover {
+            background-color: #c0392b;
+        }
+
+        /* Adicionando estilo para a tabela de atividades */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #bdc3c7;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #3498db;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #ecf0f1;
+        }
+
+        /* Estilo para contêineres com rolagem */
+        .listagem-container,
+        .atividades-container {
+            max-height: 400px; /* Ajuste a altura conforme necessário */
+            overflow-y: auto; /* Habilita rolagem vertical */
+            padding: 20px; /* Espaçamento interno */
+            border: 1px solid #bdc3c7; /* Para visualizar a borda */
+            border-radius: 10px; /* Cantos arredondados */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Tela de Login -->
+    <div class="container login-container show">
+        <h2>Bem-vindo!</h2>
+        <form onsubmit="event.preventDefault(); login();">
+            <input type="email" id="email" name="email" placeholder="Digite seu e-mail" required>
+            <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+            <input type="submit" class="button" value="Entrar">
+        </form>
+        <div class="footer">
+            <p>Não tem uma conta? <a href="#" onclick="showContainer('.registro-container');">Registre-se</a></p>
+        </div>
+    </div>
+
+    <!-- Tela de Registro -->
+    <div class="container registro-container" style="display: none;">
+        <h2>Registrar-se</h2>
+        <form onsubmit="event.preventDefault(); registrarUsuario();">
+            <input type="text" id="nome" placeholder="Digite seu nome" required>
+            <input type="email" id="email-registro" placeholder="Digite seu e-mail" required>
+            <input type="password" id="senha-registro" placeholder="Digite sua senha" required>
+            <input type="submit" class="button" value="Registrar">
+        </form>
+        <button class="button" onclick="showContainer('.login-container');">Voltar</button>
+    </div>
+
+    <!-- Tela Principal do Professor -->
+    <div class="container main-container">
+        <h2>Bem-vindo, <span id="professor-nome">Professor</span>!</h2>
+        <div class="button-group">
+            <button class="button" onclick="showContainer('.cadastro-container');">Cadastro de Turma</button>
+            <button class="button" onclick="showListagem();">Listar Turmas</button>
+            <button class="button" onclick="logout();">Sair do Sistema</button>
+        </div>
+    </div>
+
+    <!-- Tela de Cadastro de Turma -->
+    <div class="container cadastro-container">
+        <h2>Cadastro de Turma</h2>
+        <form onsubmit="event.preventDefault(); cadastrarTurma();">
+            <input type="text" id="turma" placeholder="Digite o nome da turma" required>
+            <input type="submit" class="button" value="Cadastrar">
+        </form>
+        <button class="button" onclick="showContainer('.main-container');">Voltar</button>
+    </div>
+
+    <!-- Tela de Listagem de Turmas -->
+    <div class="container listagem-container">
+        <h2>Listagem de Turmas</h2>
+        <ul class="turma-list"></ul>
+        <button class="button" onclick="showContainer('.main-container');">Voltar</button>
+    </div>
+
+    <!-- Tela de Cadastro de Atividades -->
+    <div class="container atividades-container" style="display: none;">
+        <h2>Atividades da Turma: <span id="turma-nome"></span></h2>
+        <form onsubmit="event.preventDefault(); cadastrarAtividade();">
+            <input type="text" id="descricao" placeholder="Descrição da Atividade" required>
+            <input type="date" id="prazo" required>
+            <input type="hidden" id="atividade-index">
+            <input type="submit" class="button" value="Cadastrar Atividade">
+        </form>
+        <table>
+            <thead>
+                <tr>
+                    <th>Descrição</th>
+                    <th>Prazo</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody class="atividade-list"></tbody>
+        </table>
+        <button class="button" onclick="showContainer('.listagem-container');">Voltar</button>
+    </div>
+
+    <script>
+        let turmas = []; // Array para armazenar turmas
+        let atividades = []; // Array para armazenar atividades
+        let usuarios = []; // Array para armazenar usuários registrados
+
+        function login() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            // Aqui você pode implementar a lógica de autenticação com base nos usuários registrados
+            const usuario = usuarios.find(usuario => usuario.email === email);
+            if (usuario) {
+                // Se o usuário for encontrado, você pode exibir a tela principal
+                document.getElementById("professor-nome").innerText = usuario.nome;
+                showContainer('.main-container');
+            } else {
+                alert('E-mail ou senha incorretos.');
+            }
+        }
+
+        function showContainer(containerClass) {
+            const containers = document.querySelectorAll('.container');
+            containers.forEach(container => {
+                container.classList.remove('show');
+                container.style.display = 'none'; // Esconde a seção
+            });
+            // Exibe a seção desejada
+            const selectedContainer = document.querySelector(containerClass);
+            selectedContainer.classList.add('show');
+            selectedContainer.style.display = 'block'; // Exibe a seção
+        }
+
+        function cadastrarTurma() {
+            const turmaNome = document.getElementById("turma").value;
+            turmas.push({ nome: turmaNome });
+            alert('Turma cadastrada com sucesso!');
+            document.getElementById("turma").value = ''; // Limpa o campo
+            showListagem();
+        }
+
+        function showListagem() {
+            const turmaList = document.querySelector('.turma-list');
+            turmaList.innerHTML = ''; // Limpa a lista antes de adicionar as turmas
+            turmas.forEach((turma, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    ${turma.nome}
+                    <div>
+                        <button class="button button-danger" onclick="excluirTurma(${index})">Excluir</button>
+                        <button class="button" onclick="visualizarAtividades(${index})">Visualizar Atividades</button>
+                    </div>
+                `;
+                turmaList.appendChild(li);
+            });
+            showContainer('.listagem-container');
+        }
+
+        function excluirTurma(index) {
+            const confirmacao = confirm('Você realmente deseja excluir esta turma?');
+            if (confirmacao) {
+                turmas.splice(index, 1);
+                alert('Turma excluída com sucesso!');
+                showListagem();
+            }
+        }
+
+        function visualizarAtividades(index) {
+            document.getElementById("turma-nome").innerText = turmas[index].nome;
+            showContainer('.atividades-container');
+            listarAtividades(index);
+        }
+
+        function listarAtividades(index) {
+            const atividadeList = document.querySelector('.atividade-list');
+            atividadeList.innerHTML = ''; // Limpa a lista de atividades
+            if (atividades[index]) {
+                atividades[index].forEach((atividade, i) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${atividade.descricao}</td>
+                        <td>${atividade.prazo}</td>
+                        <td>
+                            <button class="button" onclick="editarAtividade(${index}, ${i})">Editar</button>
+                            <button class="button button-danger" onclick="excluirAtividade(${index}, ${i})">Excluir</button>
+                        </td>
+                    `;
+                    atividadeList.appendChild(tr);
+                });
+            }
+        }
+
+        function cadastrarAtividade() {
+            const descricao = document.getElementById("descricao").value;
+            const prazo = document.getElementById("prazo").value;
+            const turmaIndex = turmas.findIndex(turma => turma.nome === document.getElementById("turma-nome").innerText);
+            const atividadeIndex = document.getElementById("atividade-index").value;
+
+            if (atividadeIndex) { // Se estiver editando uma atividade
+                atividades[turmaIndex][atividadeIndex] = { descricao: descricao, prazo: prazo };
+                alert('Atividade editada com sucesso!');
+            } else { // Se estiver cadastrando uma nova atividade
+                if (!atividades[turmaIndex]) {
+                    atividades[turmaIndex] = []; // Inicializa a lista de atividades para a turma
+                }
+                atividades[turmaIndex].push({ descricao: descricao, prazo: prazo });
+                alert('Atividade cadastrada com sucesso!');
+            }
+
+            // Limpa os campos e esconde o índice da atividade
+            document.getElementById("descricao").value = ''; // Limpa o campo
+            document.getElementById("prazo").value = ''; // Limpa o campo
+            document.getElementById("atividade-index").value = ''; // Limpa o índice da atividade
+            listarAtividades(turmaIndex); // Atualiza a lista de atividades
+            showContainer('.atividades-container'); // Retorna à tela de atividades
+        }
+
+        function editarAtividade(turmaIndex, atividadeIndex) {
+            const atividade = atividades[turmaIndex][atividadeIndex];
+            document.getElementById("descricao").value = atividade.descricao; // Preenche a descrição
+            document.getElementById("prazo").value = atividade.prazo; // Preenche o prazo
+            document.getElementById("atividade-index").value = atividadeIndex; // Armazena o índice da atividade
+            showContainer('.cadastro-atividade'); // Exibe o formulário de cadastro de atividade
+        }
+
+        function excluirAtividade(turmaIndex, atividadeIndex) {
+            const confirmacao = confirm('Você realmente deseja excluir esta atividade?');
+            if (confirmacao) {
+                atividades[turmaIndex].splice(atividadeIndex, 1); // Remove a atividade do array
+                alert('Atividade excluída com sucesso!');
+                listarAtividades(turmaIndex); // Atualiza a lista de atividades
+            }
+        }
+
+        function logout() {
+            alert('Logout realizado com sucesso!');
+            showContainer('.login-container'); // Redireciona para a tela de login
+        }
+
+        function registrarUsuario() {
+            const nome = document.getElementById("nome").value;
+            const email = document.getElementById("email-registro").value;
+            const senha = document.getElementById("senha-registro").value;
+
+            // Verifica se o e-mail já está registrado
+            const usuarioExistente = usuarios.find(usuario => usuario.email === email);
+            if (usuarioExistente) {
+                alert('Este e-mail já está registrado. Por favor, use outro e-mail.');
+                return;
+            }
+
+            // Adiciona o novo usuário ao array
+            usuarios.push({ nome, email, senha });
+            alert('Registro realizado com sucesso!');
+            showContainer('.login-container'); // Retorna à tela de login
+        }
+    </script>
+</body>
+
+</html>
